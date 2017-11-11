@@ -1,9 +1,11 @@
 package guestbook.dao;
 
-import guestbook.exceptions.CustomInvalidArgumentException;
 import guestbook.exceptions.DAOException;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.function.IntPredicate;
 
@@ -17,8 +19,8 @@ public class DaoLayer {
         this.connection = DBConnection.getConnection();
     }
 
-    public void executeCommand(String query, List<String> queryData)
-            throws CustomInvalidArgumentException, DAOException {
+    public boolean executeCommand(String query, List<String> queryData)
+            throws DAOException {
 
         prepareEnvironment(query, queryData);
 
@@ -27,12 +29,13 @@ public class DaoLayer {
             stmt.executeUpdate();
 
         } catch (SQLException e) {
-            throw new DAOException("Invalid query statement.");
+            throw new IllegalStateException("Invalid query statement.");
         }
+
+        return true;
     }
 
-    public ResultSet getQueryResultSet(String query, List<String> queryData)
-            throws CustomInvalidArgumentException, DAOException {
+    public ResultSet getQueryResultSet(String query, List<String> queryData) throws DAOException {
 
         prepareEnvironment(query, queryData);
         ResultSet result;
@@ -42,15 +45,13 @@ public class DaoLayer {
             result = stmt.executeQuery();
 
         } catch (SQLException e) {
-            throw new DAOException("Invalid query statement.");
+            throw new IllegalStateException("Invalid query statement.");
         }
 
         return result;
     }
 
-    private void prepareEnvironment(String query, List<String> queryData)
-            throws CustomInvalidArgumentException {
-
+    private void prepareEnvironment(String query, List<String> queryData) {
         setGivenData(query, queryData);
         validateGivenData();
     }
@@ -60,14 +61,14 @@ public class DaoLayer {
         this.queryData = queryData;
     }
 
-    private void validateGivenData() throws CustomInvalidArgumentException {
+    private void validateGivenData() {
         DataValidator validator = new DataValidator();
 
         if (validator.isAnyInputNull())
-            throw new CustomInvalidArgumentException("Incorrect value delivered, found null!");
+            throw new IllegalStateException("Incorrect value delivered, found null!");
 
         if (!validator.isAmountOfInputsEqual())
-            throw new CustomInvalidArgumentException("Not equal amount of inputs delivered.");
+            throw new IllegalStateException("Not equal amount of inputs delivered.");
 
     }
 
@@ -75,7 +76,7 @@ public class DaoLayer {
 
         PreparedStatement stmt = connection.prepareStatement(this.query);
 
-        for (int i = 0; i <= queryData.size(); i++) {
+        for (int i = 0; i < queryData.size(); i++) {
             String pieceOfData = queryData.get(i);
             int index = i + 1;
 
