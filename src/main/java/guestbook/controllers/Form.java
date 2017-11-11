@@ -9,12 +9,17 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Form implements HttpHandler {
+    private String form;
+
+    {
+        this.form = getForm();
+    }
+
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
 
-        String response = "";
+        String response = getGreetingMessage();
         String method = httpExchange.getRequestMethod();
-        String form = getForm();
 
         // Send a form if it wasn't submitted yet.
         if(method.equals("GET")){
@@ -31,7 +36,7 @@ public class Form implements HttpHandler {
             Map inputs = parseFormData(formData);
 
             response = "<html><body>" +
-                    "<form method=\"GET\"><h1>Hello " +
+                    "<form method=\"POST\"><h1>Hello " +
                     inputs.get("firstname") + " " + inputs.get("lastname") +
                     "!</h1>" +
                     "  <input type=\"submit\" value=\"Submit\">\n " +
@@ -45,14 +50,16 @@ public class Form implements HttpHandler {
         os.write(response.getBytes());
         os.close();
     }
-
+    private String getGreetingMessage() {
+        return "<h1>Tesla<Inventions> GuestBook!</h1>";
+    }
     private String getForm() {
         return  " <form method=\"POST\">\n" +
                 "  First name:<br>\n" +
-                "  <input type=\"text\" name=\"firstname\" value=\"firstname\">\n" +
+                "  <input type=\"text\" name=\"Name\" value=\"name\">\n" +
                 "  <br>\n" +
                 "  Last name:<br>\n" +
-                "  <input type=\"text\" name=\"lastname\" value=\"lastname\">\n" +
+                "  <input type=\"text\" name=\"Message\" value=\"Yours message\">\n" +
                 "  <br><br>\n" +
                 "  <input type=\"submit\" value=\"Submit\">\n" +
                 " </form> ";
