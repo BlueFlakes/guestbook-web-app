@@ -2,26 +2,24 @@ package guestbook.controllers;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import guestbook.dao.GuestBookDao;
 import guestbook.exceptions.DAOException;
+import guestbook.models.GuestBook;
 import guestbook.models.GuestStatement;
 import org.jtwig.JtwigModel;
 import org.jtwig.JtwigTemplate;
 
 import java.io.*;
 import java.net.URLDecoder;
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class Form implements HttpHandler {
-    private GuestBookDao guestBookDao;
     private List<GuestStatement> guestStatements;
+    private GuestBook guestBook;
 
     public Form() throws DAOException {
-        this.guestBookDao = new GuestBookDao();
-        loadGuestStatements();
+        this.guestBook = new GuestBook();
     }
 
     @Override
@@ -36,7 +34,7 @@ public class Form implements HttpHandler {
         response = template.render(model);
 
         if (method.equalsIgnoreCase("post")) {
-            saveGuestStatement(httpExchange);
+            evaluateGuestStatement(httpExchange);
         }
 
         httpExchange.sendResponseHeaders(200, response.length());
@@ -45,11 +43,7 @@ public class Form implements HttpHandler {
         os.close();
     }
 
-    private void loadGuestStatements() throws DAOException {
-        this.guestStatements = this.guestBookDao.getGuestStatements();
-    }
-
-    private void saveGuestStatement(HttpExchange httpExchange) throws IOException {
+    private void evaluateGuestStatement(HttpExchange httpExchange) throws IOException {
         InputStreamReader isr = new InputStreamReader(httpExchange.getRequestBody(), "utf-8");
         BufferedReader br = new BufferedReader(isr);
         String formData = br.readLine();
@@ -59,27 +53,9 @@ public class Form implements HttpHandler {
         String name = inputs.get("Username");
         String message = inputs.get("Message");
 
-        addToGuestStatementsList(name, message);
-        saveToDatabase(name, message);
+        guestBook.addGuestStatement(name, message);
     }
 
-    private void addToGuestStatementsList(String name, String message) {
-        int probablyLastIndex = this.guestStatements.size() - 1;
-        int highestId = this.guestStatements.size() > 0 ? this.guestStatements.get(probablyLastIndex).getId()
-                                                        : 0;
-        int uniqueId = highestId + 1;
-
-        GuestStatement stmt = new GuestStatement(uniqueId, name, LocalDateTime.now(), message);
-        this.guestStatements.add(stmt);
-    }
-
-    private void saveToDatabase(String name, String message) {
-        try {
-            guestBookDao.addGuestStatement(name, message);
-        } catch (DAOException e) {
-            // TODO exception management
-        }
-    }
 
     /**
      * Form data is sent as a urlencoded string. Thus we have to parse this string to get data that we want.
