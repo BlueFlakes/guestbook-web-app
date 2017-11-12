@@ -20,6 +20,10 @@ public class GuestBook {
         loadStatements();
     }
 
+    public List<GuestStatement> getGuestStatements() {
+        return this.guestStatements;
+    }
+
     private void loadStatements() throws DAOException {
         this.guestStatements = this.guestBookDao.getGuestStatements();
     }
