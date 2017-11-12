@@ -24,20 +24,26 @@ public class Form implements HttpHandler {
 
         String response;
         String method = httpExchange.getRequestMethod();
+        addNewStatementIfOccured(method, httpExchange);
 
         JtwigTemplate template = JtwigTemplate.classpathTemplate("templates/GuestBookTemplate.twig");
         JtwigModel model = JtwigModel.newModel();
 
-        response = template.render(model);
+        model.with("title", "Tesla Inventions, GuestBook!");
+        model.with("guest_statements", guestBook.getGuestStatementsAsNestedStrings());
 
-        if (method.equalsIgnoreCase("post")) {
-            evaluateGuestStatement(httpExchange);
-        }
+        response = template.render(model);
 
         httpExchange.sendResponseHeaders(200, response.length());
         OutputStream os = httpExchange.getResponseBody();
         os.write(response.getBytes());
         os.close();
+    }
+
+    private void addNewStatementIfOccured(String method, HttpExchange httpExchange) throws IOException {
+        if (method.equalsIgnoreCase("Post")) {
+            evaluateGuestStatement(httpExchange);
+        }
     }
 
     private void evaluateGuestStatement(HttpExchange httpExchange) throws IOException {

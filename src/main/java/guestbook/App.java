@@ -2,6 +2,7 @@ package guestbook;
 
 import com.sun.net.httpserver.HttpServer;
 import guestbook.controllers.Form;
+import guestbook.controllers.Static;
 
 import java.net.InetSocketAddress;
 
@@ -12,7 +13,8 @@ public class App {
         HttpServer server = HttpServer.create(new InetSocketAddress(8000), 0);
 
         // set routes
-        server.createContext("/Form", new Form());
+        server.createContext("/static", new Static());
+        server.createContext("/form", new Form());
         server.setExecutor(null); // creates a default executor
 
         // start listening

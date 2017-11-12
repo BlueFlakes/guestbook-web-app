@@ -4,6 +4,9 @@ import guestbook.dao.GuestBookDao;
 import guestbook.exceptions.DAOException;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -22,6 +25,25 @@ public class GuestBook {
 
     public List<GuestStatement> getGuestStatements() {
         return this.guestStatements;
+    }
+
+    public List<List<String>> getGuestStatementsAsNestedStrings() {
+        List<List<String>> accumulator = new ArrayList<>();
+
+        for (GuestStatement gStmt : this.guestStatements) {
+            String firstname = gStmt.getFirstname();
+            String date = getFormatedDate(gStmt.getDate());
+            String message = gStmt.getMessage();
+
+            accumulator.add(Arrays.asList(message, firstname, date));
+        }
+
+        return accumulator;
+    }
+
+    private String getFormatedDate(LocalDateTime date) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm dd-MM-yyyy");
+        return date.format(formatter);
     }
 
     private void loadStatements() throws DAOException {

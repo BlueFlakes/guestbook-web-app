@@ -1,24 +1,36 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <link rel="stylesheet" type="text/templates.css" href="css/styles.css">
-    <style>
-        h1 {
-            color: yellow;
-        }
-    </style>
+    <link rel="stylesheet" href="static/css/styles.css">
+
 </head>
 <body>
-    <main>
-        <h1>Tesla Inventions, GuestBook!</h1>
+    <header>
+        <h1>{{ title }}</h1>
+    </header>
 
-        <ul class="outer-ol">
-            <li>first element</li>
+    <figure>
+        {% for record in guest_statements %}
 
+            <div class="guest-statement">
+                <p>{{ record[0] }}</p>
 
-        </ul>
-    </main>
+                <div class="name-date">
 
+                    {% for statement in record %}
+                    {% if loop.index > 1 %}
+                            <p>{{ statement }}</p>
+                    {% endif %}
+
+                {% endfor %}
+                </div>
+
+            </div>
+
+        {% endfor %}
+    </figure>
+
+<!--
     <form method="POST">
         <label for="#guestbook-username">Name</label>
         <input type="text" name="Username" id="#guestbook-username" value="name">
@@ -26,5 +38,13 @@
         <input type="text" name="Message" id="#guestbook-message" value="message">
         <input type="submit" value="Submit">
     </form>
+-->
+    <div class="form-style-6">
+        <form method="post">
+            <input type="text" name="Username" value="Name" />
+            <textarea name="Message" value="xxx">Message</textarea>
+            <input type="submit" value="submit"/>
+        </form>
+    </div>
 </body>
 </html>
