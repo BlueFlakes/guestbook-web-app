@@ -4,14 +4,12 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import guestbook.exceptions.DAOException;
 import guestbook.models.GuestBook;
-import guestbook.models.GuestStatement;
 import org.jtwig.JtwigModel;
 import org.jtwig.JtwigTemplate;
 
 import java.io.*;
 import java.net.URLDecoder;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class Form implements HttpHandler {
@@ -54,7 +52,6 @@ public class Form implements HttpHandler {
 
         guestBook.addGuestStatement(name, message);
     }
-
 
     /**
      * Form data is sent as a urlencoded string. Thus we have to parse this string to get data that we want.
