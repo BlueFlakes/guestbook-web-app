@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 
 public class Form implements HttpHandler {
-    private List<GuestStatement> guestStatements;
     private GuestBook guestBook;
 
     public Form() throws DAOException {
