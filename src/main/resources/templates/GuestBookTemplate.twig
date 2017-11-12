@@ -13,32 +13,23 @@
         {% for record in guest_statements %}
 
             <div class="guest-statement">
-                <p>{{ record[0] }}</p>
+                <div class="message">
+                    <p>{{ record[0] }}</p>
 
-                <div class="name-date">
+                    <div class="name-date">
 
-                    {% for statement in record %}
-                    {% if loop.index > 1 %}
-                            <p>{{ statement }}</p>
-                    {% endif %}
+                        {% for statement in record %}
+                        {% if loop.index > 1 %}
+                                <p>{{ statement }}</p>
+                        {% endif %}
 
-                {% endfor %}
+                    {% endfor %}
+                    </div>
                 </div>
-
             </div>
 
         {% endfor %}
     </figure>
-
-<!--
-    <form method="POST">
-        <label for="#guestbook-username">Name</label>
-        <input type="text" name="Username" id="#guestbook-username" value="name">
-        <label for="#guestbook-message">Message</label>
-        <input type="text" name="Message" id="#guestbook-message" value="message">
-        <input type="submit" value="Submit">
-    </form>
--->
     <div class="form-style-6">
         <form method="post">
             <input type="text" name="Username" value="Name" />

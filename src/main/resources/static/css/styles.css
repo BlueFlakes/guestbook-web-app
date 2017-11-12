@@ -1,31 +1,36 @@
 h1 {
     font-size: 300%;
+    margin-top: 0;
+    color:whitesmoke;
 }
 
 .name-date {
     text-align: right;
     font-size: 75%;
-
 }
 
 figure {
-    margin: 5% 35% 3.5%;
+    margin: 3% 37.5% 3.5%;
+}
+
+.message {
+    padding-left: 3%;
+    padding-right: 3%;
 }
 
 .guest-statement {
-    background-color:aliceblue
+    background-color:rgba(220, 230, 247, 0.5);
 }
 
 header {
     text-align: center;
+    background-color: #655354;
+
 }
 
 body {
-    background-color:azure;
-
-}
-textarea {
-    resize: none;
+    background-color: whitesmoke;
+    margin: 0%;
 }
 
 .form-style-6{
@@ -38,6 +43,7 @@ textarea {
 
 textarea {
     height: 80px;
+    resize: none;
 }
 
 .form-style-6 input[type="text"],
