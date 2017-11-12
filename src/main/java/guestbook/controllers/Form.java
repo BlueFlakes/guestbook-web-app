@@ -2,47 +2,41 @@ package guestbook.controllers;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import guestbook.dao.GuestBookDao;
+import guestbook.exceptions.DAOException;
+import guestbook.models.GuestStatement;
+import org.jtwig.JtwigModel;
+import org.jtwig.JtwigTemplate;
 
 import java.io.*;
 import java.net.URLDecoder;
+import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Form implements HttpHandler {
-    private String form;
+    private GuestBookDao guestBookDao;
+    private List<GuestStatement> guestStatements;
 
-    {
-        this.form = getForm();
+    public Form() throws DAOException {
+        this.guestBookDao = new GuestBookDao();
+        loadGuestStatements();
     }
 
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
 
-        String response = getGreetingMessage();
+        String response;
         String method = httpExchange.getRequestMethod();
 
-        // Send a form if it wasn't submitted yet.
-        if(method.equals("GET")){
-            response = "<html><body>" + form + "</body></html>";
-        }
+        JtwigTemplate template = JtwigTemplate.classpathTemplate("templates/GuestBookTemplate.twig");
+        JtwigModel model = JtwigModel.newModel();
 
-        // If the form was submitted, retrieve it's content.
-        if(method.equals("POST")){
-            InputStreamReader isr = new InputStreamReader(httpExchange.getRequestBody(), "utf-8");
-            BufferedReader br = new BufferedReader(isr);
-            String formData = br.readLine();
+        response = template.render(model);
 
-            System.out.println(formData);
-            Map inputs = parseFormData(formData);
-
-            response = "<html><body>" +
-                    "<form method=\"POST\"><h1>Hello " +
-                    inputs.get("firstname") + " " + inputs.get("lastname") +
-                    "!</h1>" +
-                    "  <input type=\"submit\" value=\"Submit\">\n " +
-                    "  <input type=\"text\" name=\"lastname\" value=\"Mouse\">\n" +
-                    "  <br><br>\n" +
-                    "</form></body><html>";
+        if (method.equalsIgnoreCase("post")) {
+            saveGuestStatement(httpExchange);
         }
 
         httpExchange.sendResponseHeaders(200, response.length());
@@ -50,22 +44,42 @@ public class Form implements HttpHandler {
         os.write(response.getBytes());
         os.close();
     }
-    private String getGreetingMessage() {
-        return "<h1>Tesla<Inventions> GuestBook!</h1>";
-    }
-    private String getForm() {
-        return  " <form method=\"POST\">\n" +
-                "  First name:<br>\n" +
-                "  <input type=\"text\" name=\"Name\" value=\"name\">\n" +
-                "  <br>\n" +
-                "  Last name:<br>\n" +
-                "  <input type=\"text\" name=\"Message\" value=\"Yours message\">\n" +
-                "  <br><br>\n" +
-                "  <input type=\"submit\" value=\"Submit\">\n" +
-                " </form> ";
+
+    private void loadGuestStatements() throws DAOException {
+        this.guestStatements = this.guestBookDao.getGuestStatements();
     }
 
+    private void saveGuestStatement(HttpExchange httpExchange) throws IOException {
+        InputStreamReader isr = new InputStreamReader(httpExchange.getRequestBody(), "utf-8");
+        BufferedReader br = new BufferedReader(isr);
+        String formData = br.readLine();
 
+        Map<String, String> inputs = parseFormData(formData);
+
+        String name = inputs.get("Username");
+        String message = inputs.get("Message");
+
+        addToGuestStatementsList(name, message);
+        saveToDatabase(name, message);
+    }
+
+    private void addToGuestStatementsList(String name, String message) {
+        int probablyLastIndex = this.guestStatements.size() - 1;
+        int highestId = this.guestStatements.size() > 0 ? this.guestStatements.get(probablyLastIndex).getId()
+                                                        : 0;
+        int uniqueId = highestId + 1;
+
+        GuestStatement stmt = new GuestStatement(uniqueId, name, LocalDateTime.now(), message);
+        this.guestStatements.add(stmt);
+    }
+
+    private void saveToDatabase(String name, String message) {
+        try {
+            guestBookDao.addGuestStatement(name, message);
+        } catch (DAOException e) {
+            // TODO exception management
+        }
+    }
 
     /**
      * Form data is sent as a urlencoded string. Thus we have to parse this string to get data that we want.
